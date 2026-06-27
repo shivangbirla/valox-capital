@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 225 33% 98%;
+    --foreground: 223 24% 6%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 223 24% 6%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 24% 6%;
+
+    --primary: 164 85% 38%;
+    --primary-foreground: 161 67% 5%;
+
+    --secondary: 220 31% 95%;
+    --secondary-foreground: 223 24% 6%;
+
+    --muted: 220 31% 95%;
+    --muted-foreground: 218 12% 40%;
+
+    --accent: 247 75% 64%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 24% 91%;
+    --input: 220 24% 91%;
+    --ring: 164 85% 38%;
+
+    --aurora-teal: 164 85% 38%;
+    --aurora-cyan: 191 85% 46%;
+    --aurora-violet: 247 75% 64%;
+
+    --radius: 0.875rem;
+  }
+
+  .dark {
+    --background: 225 17% 5%;
+    --foreground: 220 26% 93%;
+
+    --card: 223 22% 8%;
+    --card-foreground: 220 26% 93%;
+
+    --popover: 223 22% 8%;
+    --popover-foreground: 220 26% 93%;
+
+    --primary: 163 70% 51%;
+    --primary-foreground: 160 65% 5%;
+
+    --secondary: 222 21% 11%;
+    --secondary-foreground: 220 26% 93%;
+
+    --muted: 222 21% 11%;
+    --muted-foreground: 218 13% 65%;
+
+    --accent: 248 87% 72%;
+    --accent-foreground: 225 17% 5%;
+
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 225 17% 5%;
+
+    --border: 223 21% 17%;
+    --input: 223 21% 17%;
+    --ring: 163 70% 51%;
+
+    --aurora-teal: 163 70% 51%;
+    --aurora-cyan: 188 86% 53%;
+    --aurora-violet: 248 87% 72%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+  }
+
+  /* Themed, comfortable focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .aurora-gradient {
+    background-image: linear-gradient(
+      120deg,
+      hsl(var(--aurora-teal)) 0%,
+      hsl(var(--aurora-cyan)) 48%,
+      hsl(var(--aurora-violet)) 100%
+    );
+  }
+
+  .text-aurora {
+    background-image: linear-gradient(
+      110deg,
+      hsl(var(--aurora-teal)) 0%,
+      hsl(var(--aurora-cyan)) 45%,
+      hsl(var(--aurora-violet)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Frosted card surface for the dark, luminous look */
+  .glass {
+    background-color: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid hsl(var(--border) / 0.8);
+  }
+
+  .hairline {
+    border-color: hsl(var(--border) / 0.7);
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* Belt-and-braces reduced-motion safety net (Framer Motion also respects this) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
