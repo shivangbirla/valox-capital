@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import Papa from "papaparse";
+import { useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -11,9 +10,10 @@ import {
 } from "recharts";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { cn, formatINR2, formatPct } from "@/lib/utils";
-import { NAV, NAV_SHEET_URL, DISCLOSURES } from "@/lib/constants";
-import { SAMPLE_NAV, type NavPoint } from "@/data/navSample";
+import { DISCLOSURES } from "@/lib/constants";
+import { type NavPoint } from "@/data/navSample";
 import { useTheme } from "@/components/theme-provider";
+import { useNavData, fmtLongDate } from "@/hooks/useNavData";
 
 const RANGES = [
   { label: "1M", days: 30 },
@@ -25,35 +25,18 @@ const RANGES = [
 
 type RangeLabel = (typeof RANGES)[number]["label"];
 
-function parseCsv(text: string): NavPoint[] {
-  const parsed = Papa.parse<Record<string, string>>(text, {
-    header: true,
-    skipEmptyLines: true,
-  });
-  return (parsed.data || [])
-    .map((row) => ({
-      date: String(row.date ?? row.Date ?? "").trim(),
-      nav: Number(row.nav ?? row.NAV ?? row.value),
-    }))
-    .filter((p) => p.date && Number.isFinite(p.nav))
-    .sort((a, b) => a.date.localeCompare(b.date));
-}
-
 function fmtAxisDate(value: string) {
   const d = new Date(value);
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-function fmtLongDate(value: string) {
-  const d = new Date(value);
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function NavTooltip({ active, payload }: { active?: boolean; payload?: any[] }) {
+function NavTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: any[];
+}) {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload as NavPoint;
   return (
@@ -68,44 +51,9 @@ function NavTooltip({ active, payload }: { active?: boolean; payload?: any[] }) 
 
 export function NavChart() {
   const { theme } = useTheme();
-  const [data, setData] = useState<NavPoint[]>(SAMPLE_NAV);
-  const [isLive, setIsLive] = useState(false);
-  const [range, setRange] = useState<RangeLabel>("3M");
-
-  useEffect(() => {
-    if (!NAV_SHEET_URL) return;
-    let cancelled = false;
-    fetch(NAV_SHEET_URL)
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.text();
-      })
-      .then((text) => {
-        const rows = parseCsv(text);
-        if (!cancelled && rows.length > 1) {
-          setData(rows);
-          setIsLive(true);
-        }
-      })
-      .catch(() => {
-        /* keep sample data on any failure */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const { latest, prev, asOf } = useMemo(() => {
-    if (data.length >= 2) {
-      const last = data[data.length - 1];
-      const before = data[data.length - 2];
-      return { latest: last.nav, prev: before.nav, asOf: fmtLongDate(last.date) };
-    }
-    return { latest: NAV.latest, prev: NAV.latest, asOf: NAV.asOf };
-  }, [data]);
-
-  const changePct = prev ? ((latest - prev) / prev) * 100 : NAV.dayChangePct;
+  const { rows: data, isLive, latest, changePct, asOf } = useNavData();
   const positive = changePct >= 0;
+  const [range, setRange] = useState<RangeLabel>("3M");
 
   const filtered = useMemo(() => {
     if (range === "All" || !data.length) return data;
@@ -134,7 +82,9 @@ export function NavChart() {
     <div className="glass overflow-hidden rounded-3xl p-5 sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Latest NAV · as on {asOf}</p>
+          <p className="text-sm text-muted-foreground">
+            Latest NAV · as on {asOf}
+          </p>
           <div className="mt-1.5 flex items-baseline gap-3">
             <span className="tnum font-display text-4xl font-semibold tracking-tight sm:text-5xl">
               {formatINR2(latest)}
@@ -144,7 +94,7 @@ export function NavChart() {
                 "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium tnum",
                 positive
                   ? "bg-primary/12 text-primary"
-                  : "bg-destructive/12 text-destructive"
+                  : "bg-destructive/12 text-destructive",
               )}
             >
               {positive ? (
@@ -177,7 +127,7 @@ export function NavChart() {
                 "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                 range === r.label
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {r.label}
@@ -188,14 +138,21 @@ export function NavChart() {
 
       <div className="mt-6 h-[260px] w-full sm:h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={filtered} margin={{ top: 8, right: 6, left: 6, bottom: 0 }}>
+          <AreaChart
+            data={filtered}
+            margin={{ top: 8, right: 6, left: 6, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="navFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={colors.line} stopOpacity={0.32} />
                 <stop offset="100%" stopColor={colors.line} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke={colors.grid} strokeOpacity={0.6} />
+            <CartesianGrid
+              vertical={false}
+              stroke={colors.grid}
+              strokeOpacity={0.6}
+            />
             <XAxis
               dataKey="date"
               tickFormatter={fmtAxisDate}
@@ -214,7 +171,11 @@ export function NavChart() {
             />
             <Tooltip
               content={<NavTooltip />}
-              cursor={{ stroke: colors.line, strokeOpacity: 0.4, strokeDasharray: "4 4" }}
+              cursor={{
+                stroke: colors.line,
+                strokeOpacity: 0.4,
+                strokeDasharray: "4 4",
+              }}
             />
             <Area
               type="monotone"

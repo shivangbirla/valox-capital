@@ -37,7 +37,15 @@ function lumpFutureValue(p: number, annualRate: number, years: number) {
   return p * Math.pow(1 + annualRate / 100, years);
 }
 
-function CalcTooltip({ active, payload, label }: { active?: boolean; payload?: any[]; label?: any }) {
+function CalcTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: any[];
+  label?: any;
+}) {
   if (!active || !payload?.length) return null;
   const value = payload.find((p) => p.dataKey === "value")?.value ?? 0;
   const invested = payload.find((p) => p.dataKey === "invested")?.value ?? 0;
@@ -59,9 +67,9 @@ function CalcTooltip({ active, payload, label }: { active?: boolean; payload?: a
 export default function Calculator() {
   const { theme } = useTheme();
   const [mode, setMode] = useState<Mode>("onetime");
-  const [amount, setAmount] = useState(1_000_000);
+  const [amount, setAmount] = useState(100_000);
   const [years, setYears] = useState(10);
-  const [rate, setRate] = useState(12);
+  const [rate, setRate] = useState(18);
 
   const safeAmount = Number.isFinite(amount) && amount > 0 ? amount : 0;
 
@@ -70,7 +78,8 @@ export default function Calculator() {
       mode === "onetime"
         ? lumpFutureValue(safeAmount, rate, years)
         : sipFutureValue(safeAmount, rate, years);
-    const totalInvested = mode === "onetime" ? safeAmount : safeAmount * years * 12;
+    const totalInvested =
+      mode === "onetime" ? safeAmount : safeAmount * years * 12;
     const g = fv - totalInvested;
     const pct = totalInvested > 0 ? (g / totalInvested) * 100 : 0;
 
@@ -79,24 +88,57 @@ export default function Calculator() {
       value: Math.round(
         mode === "onetime"
           ? lumpFutureValue(safeAmount, rate, k)
-          : sipFutureValue(safeAmount, rate, k)
+          : sipFutureValue(safeAmount, rate, k),
       ),
-      invested: Math.round(mode === "onetime" ? safeAmount : safeAmount * k * 12),
+      invested: Math.round(
+        mode === "onetime" ? safeAmount : safeAmount * k * 12,
+      ),
     }));
 
-    return { projected: fv, invested: totalInvested, gain: g, pctGain: pct, series: pts };
+    return {
+      projected: fv,
+      invested: totalInvested,
+      gain: g,
+      pctGain: pct,
+      series: pts,
+    };
   }, [mode, safeAmount, years, rate]);
 
   const colors =
     theme === "dark"
-      ? { line: "#2BD9A8", invested: "#8B7BF6", grid: "#222734", text: "#9AA3B2" }
-      : { line: "#0FB388", invested: "#6D5DE8", grid: "#E3E7EE", text: "#5A6372" };
+      ? {
+          line: "#2BD9A8",
+          invested: "#8B7BF6",
+          grid: "#222734",
+          text: "#9AA3B2",
+        }
+      : {
+          line: "#0FB388",
+          invested: "#6D5DE8",
+          grid: "#E3E7EE",
+          text: "#5A6372",
+        };
 
   const results = [
-    { label: "Projected value", value: projected, fmt: formatINR, primary: true },
-    { label: "Total invested", value: invested, fmt: formatINR, primary: false },
+    {
+      label: "Projected value",
+      value: projected,
+      fmt: formatINR,
+      primary: true,
+    },
+    {
+      label: "Total invested",
+      value: invested,
+      fmt: formatINR,
+      primary: false,
+    },
     { label: "Illustrative gain", value: gain, fmt: formatINR, primary: false },
-    { label: "% gain (illustrative)", value: pctGain, fmt: (n: number) => formatPct(n), primary: true },
+    {
+      label: "% gain (illustrative)",
+      value: pctGain,
+      fmt: (n: number) => formatPct(n),
+      primary: true,
+    },
   ];
 
   return (
@@ -118,8 +160,9 @@ export default function Calculator() {
                 Model the power of compounding.
               </h1>
               <p className="mt-5 text-pretty text-lg leading-relaxed text-muted-foreground">
-                Adjust the inputs to see how an investment could grow over time. You choose the
-                assumed rate — these figures are an illustration, not a forecast of Valox returns.
+                Adjust the inputs to see how an investment could grow over time.
+                You choose the assumed rate — these figures are an illustration,
+                not a forecast of Valox returns.
               </p>
             </Reveal>
           </div>
@@ -150,7 +193,7 @@ export default function Calculator() {
                       "rounded-lg py-2 text-sm font-medium transition-colors",
                       mode === m.id
                         ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     {m.label}
@@ -161,7 +204,9 @@ export default function Calculator() {
               {/* Amount */}
               <div className="mt-6">
                 <Label htmlFor="amount">
-                  {mode === "onetime" ? "Investment amount" : "Monthly investment"}
+                  {mode === "onetime"
+                    ? "Investment amount"
+                    : "Monthly investment"}
                 </Label>
                 <div className="relative mt-1.5">
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -177,7 +222,9 @@ export default function Calculator() {
                     className="pl-7 tnum"
                   />
                 </div>
-                <p className="tnum mt-1.5 text-xs text-muted-foreground">{formatINR(safeAmount)}</p>
+                <p className="tnum mt-1.5 text-xs text-muted-foreground">
+                  {formatINR(safeAmount)}
+                </p>
               </div>
 
               {/* Years */}
@@ -204,7 +251,9 @@ export default function Calculator() {
               <div className="mt-6">
                 <div className="flex items-baseline justify-between">
                   <Label htmlFor="rate">Assumed annual return</Label>
-                  <span className="tnum text-sm font-medium text-primary">{rate}%</span>
+                  <span className="tnum text-sm font-medium text-primary">
+                    {rate}%
+                  </span>
                 </div>
                 <Slider
                   id="rate"
@@ -218,7 +267,8 @@ export default function Calculator() {
                 />
                 <p className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  You set this assumption — it is not a Valox forecast or guarantee.
+                  You set this assumption — it is not a Valox forecast or
+                  guarantee.
                 </p>
               </div>
             </div>
@@ -235,7 +285,7 @@ export default function Calculator() {
                       "rounded-2xl border p-5",
                       r.primary
                         ? "border-primary/30 bg-primary/5"
-                        : "border-border bg-card dark:bg-card/60 dark:backdrop-blur"
+                        : "border-border bg-card dark:bg-card/60 dark:backdrop-blur",
                     )}
                   >
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -244,10 +294,15 @@ export default function Calculator() {
                     <p
                       className={cn(
                         "tnum mt-2 font-display text-3xl font-bold tracking-tight sm:text-[2rem]",
-                        r.primary ? "text-primary" : "text-foreground"
+                        r.primary ? "text-primary" : "text-foreground",
                       )}
                     >
-                      <CountUp value={r.value} live duration={0.5} format={r.fmt} />
+                      <CountUp
+                        value={r.value}
+                        live
+                        duration={0.5}
+                        format={r.fmt}
+                      />
                     </p>
                   </div>
                 ))}
@@ -256,24 +311,51 @@ export default function Calculator() {
               <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 dark:bg-card/60 dark:backdrop-blur">
                 <div className="mb-2 flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: colors.line }} />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ background: colors.line }}
+                    />
                     Projected value
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: colors.invested }} />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ background: colors.invested }}
+                    />
                     Total invested
                   </span>
                 </div>
                 <div className="h-[280px] w-full sm:h-[340px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={series} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                    <ComposedChart
+                      data={series}
+                      margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                    >
                       <defs>
-                        <linearGradient id="calcFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={colors.line} stopOpacity={0.3} />
-                          <stop offset="100%" stopColor={colors.line} stopOpacity={0} />
+                        <linearGradient
+                          id="calcFill"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor={colors.line}
+                            stopOpacity={0.3}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={colors.line}
+                            stopOpacity={0}
+                          />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid vertical={false} stroke={colors.grid} strokeOpacity={0.6} />
+                      <CartesianGrid
+                        vertical={false}
+                        stroke={colors.grid}
+                        strokeOpacity={0.6}
+                      />
                       <XAxis
                         dataKey="year"
                         tickFormatter={(v) => `Y${v}`}
@@ -287,15 +369,18 @@ export default function Calculator() {
                           v >= 1e7
                             ? `₹${(v / 1e7).toFixed(1)}Cr`
                             : v >= 1e5
-                            ? `₹${(v / 1e5).toFixed(0)}L`
-                            : `₹${v}`
+                              ? `₹${(v / 1e5).toFixed(0)}L`
+                              : `₹${v}`
                         }
                         tickLine={false}
                         axisLine={false}
                         width={56}
                         tick={{ fontSize: 12, fill: colors.text }}
                       />
-                      <Tooltip content={<CalcTooltip />} cursor={{ stroke: colors.line, strokeOpacity: 0.3 }} />
+                      <Tooltip
+                        content={<CalcTooltip />}
+                        cursor={{ stroke: colors.line, strokeOpacity: 0.3 }}
+                      />
                       <Area
                         type="monotone"
                         dataKey="value"
@@ -320,7 +405,9 @@ export default function Calculator() {
               </div>
 
               <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-border bg-muted/40 p-5 sm:flex-row sm:items-center">
-                <p className="text-sm text-muted-foreground">{DISCLOSURES.calculatorTag}</p>
+                <p className="text-sm text-muted-foreground">
+                  {DISCLOSURES.calculatorTag}
+                </p>
                 <Button asChild className="shrink-0">
                   <Link to="/contact">
                     Ready to start? Get in touch
