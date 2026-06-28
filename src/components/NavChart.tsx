@@ -73,6 +73,9 @@ export function NavChart() {
     return [min - pad, max + pad];
   }, [filtered]);
 
+  // Fewer decimals as the visible band widens, so ticks never collapse to "₹10, ₹10".
+  const navDecimals = hi - lo < 2 ? 2 : hi - lo < 20 ? 1 : 0;
+
   const colors =
     theme === "dark"
       ? { line: "#2BD9A8", grid: "#222734", text: "#9AA3B2" }
@@ -113,7 +116,7 @@ export function NavChart() {
         </div>
 
         <div
-          className="flex flex-wrap gap-1 rounded-xl border border-border bg-background/50 p-1"
+          className="flex w-full gap-1 rounded-xl border border-border bg-background/50 p-1 sm:w-auto"
           role="group"
           aria-label="Select chart range"
         >
@@ -124,7 +127,7 @@ export function NavChart() {
               onClick={() => setRange(r.label)}
               aria-pressed={range === r.label}
               className={cn(
-                "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:flex-none",
                 range === r.label
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -163,10 +166,15 @@ export function NavChart() {
             />
             <YAxis
               domain={[lo, hi]}
-              tickFormatter={(v) => `₹${Number(v).toFixed(0)}`}
+              tickFormatter={(v) =>
+                `₹${Number(v).toLocaleString("en-IN", {
+                  minimumFractionDigits: navDecimals,
+                  maximumFractionDigits: navDecimals,
+                })}`
+              }
               tickLine={false}
               axisLine={false}
-              width={42}
+              width={56}
               tick={{ fontSize: 12, fill: colors.text }}
             />
             <Tooltip
