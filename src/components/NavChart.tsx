@@ -52,7 +52,7 @@ function NavTooltip({
 
 export function NavChart() {
   const { theme } = useTheme();
-  const { rows: data, isLive, latest, changePct, asOf } = useNavData();
+  const { rows: data, isLive, latest, asOf } = useNavData();
   // const positive = changePct >= 0;
   const [range, setRange] = useState<RangeLabel>("3M");
 
