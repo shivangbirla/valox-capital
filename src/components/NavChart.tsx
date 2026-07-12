@@ -8,8 +8,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { cn, formatINR2, formatPct } from "@/lib/utils";
+// import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { cn, formatINR2 } from "@/lib/utils";
+// import { formatPct } from "@/lib/utils";
 import { DISCLOSURES } from "@/lib/constants";
 import { type NavPoint } from "@/data/navSample";
 import { useTheme } from "@/components/theme-provider";
@@ -52,7 +53,7 @@ function NavTooltip({
 export function NavChart() {
   const { theme } = useTheme();
   const { rows: data, isLive, latest, changePct, asOf } = useNavData();
-  const positive = changePct >= 0;
+  // const positive = changePct >= 0;
   const [range, setRange] = useState<RangeLabel>("3M");
 
   const filtered = useMemo(() => {
