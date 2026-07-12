@@ -143,13 +143,13 @@ export default function Landing() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               <span className="tnum">Live NAV ₹{nav.latest.toFixed(2)}</span>
-              <span className="text-muted-foreground">·</span>
+              {/* <span className="text-muted-foreground">·</span>
               <span
                 className={`tnum ${nav.changePct >= 0 ? "text-primary" : "text-destructive"}`}
               >
                 {nav.changePct >= 0 ? "+" : ""}
                 {nav.changePct.toFixed(1)}% today
-              </span>
+              </span> */}
             </div>
           </Reveal>
 

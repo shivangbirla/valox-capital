@@ -92,7 +92,7 @@ export function NavChart() {
             <span className="tnum font-display text-4xl font-semibold tracking-tight sm:text-5xl">
               {formatINR2(latest)}
             </span>
-            <span
+            {/* <span
               className={cn(
                 "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium tnum",
                 positive
@@ -106,7 +106,7 @@ export function NavChart() {
                 <ArrowDownRight className="h-4 w-4" />
               )}
               {formatPct(Math.abs(changePct))}
-            </span>
+            </span> */}
           </div>
           {!isLive && (
             <p className="mt-2 text-xs text-muted-foreground/80">
